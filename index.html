@@ -169,6 +169,11 @@
       </div>
     </div>
 
+    <div id="error-banner" class="banner" hidden>
+      Add the parameter <code>v</code> to the URL with the YouTube video ID
+      (e.g. <code>?v=dQw4w9WgXcQ</code>).
+    </div>
+
     <script>
       let volume = 100;
 
@@ -239,6 +244,9 @@
           document.getElementById("volume").style.background = "gray";
           document.getElementById("volume").style.opacity = "0.25";
           document.getElementById("volume").style.pointerEvents = "none";
+
+          var banner = document.getElementById("error-banner");
+          if (banner) banner.removeAttribute("hidden");
         }
 
         // Toggle via click
