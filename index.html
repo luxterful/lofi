@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <title>YouTube Music Player</title>
     <style>
       html,
@@ -168,16 +169,6 @@
       </div>
     </div>
 
-    <div class="banner" role="contentinfo">
-      This site is just a YouTube mirror to the stream of Lofi Girl. Watch on
-      <a
-        href="https://www.youtube.com/watch?v=jfKfPfyJRdk"
-        target="_blank"
-        rel="noopener noreferrer"
-        >YouTube</a
-      >.
-    </div>
-
     <script>
       let volume = 100;
 
@@ -194,45 +185,61 @@
       var toggleBtn;
       var volumeSlider;
 
+      const urlParams = new URLSearchParams(document.location.search);
+      const videoId = urlParams.get("v");
+
       // Called by the YouTube Iframe API when it's ready
       function onYouTubeIframeAPIReady() {
         toggleBtn = document.getElementById("toggle");
         volumeSlider = document.getElementById("volume");
-        ytPlayer = new YT.Player("player", {
-          videoId: "jfKfPfyJRdk",
-          playerVars: {
-            autoplay: 1, // attempt autoplay
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            rel: 0,
-            modestbranding: 1,
-            playsinline: 1,
-            // Start muted to satisfy autoplay policies
-            mute: 1,
-          },
-          events: {
-            onReady: function () {
-              // Autoplay policies typically require muted playback without user gesture
-              ensureIframePermissions();
-              try {
-                ytPlayer.mute();
-              } catch (e) {}
+        try {
+          ytPlayer = new YT.Player("player", {
+            videoId,
+            playerVars: {
+              autoplay: 0, // attempt autoplay
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              rel: 0,
+              modestbranding: 1,
+              playsinline: 1,
+              // Start muted to satisfy autoplay policies
+              mute: 1,
             },
-            onStateChange: function (event) {
-              if (event.data === YT.PlayerState.PLAYING) {
-                isPlaying = true;
-                updateUI(true);
-              } else if (
-                event.data === YT.PlayerState.PAUSED ||
-                event.data === YT.PlayerState.ENDED
-              ) {
-                isPlaying = false;
-                updateUI(false);
-              }
+            events: {
+              onReady: function () {
+                // Autoplay policies typically require muted playback without user gesture
+                ensureIframePermissions();
+                try {
+                  ytPlayer.mute();
+                } catch (e) {}
+              },
+              onStateChange: function (event) {
+                if (event.data === YT.PlayerState.PLAYING) {
+                  isPlaying = true;
+                  updateUI(true);
+                } else if (
+                  event.data === YT.PlayerState.PAUSED ||
+                  event.data === YT.PlayerState.ENDED
+                ) {
+                  isPlaying = false;
+                  updateUI(false);
+                }
+              },
+              onError: function (event) {
+                console.log("YouTube player error:", event);
+              },
             },
-          },
-        });
+          });
+        } catch (e) {
+          document.getElementById("toggle").style.background = "gray";
+          document.getElementById("toggle").style.opacity = "0.25";
+          document.getElementById("toggle").style.pointerEvents = "none";
+
+          document.getElementById("volume").style.background = "gray";
+          document.getElementById("volume").style.opacity = "0.25";
+          document.getElementById("volume").style.pointerEvents = "none";
+        }
 
         // Toggle via click
         toggleBtn.addEventListener("click", function () {
@@ -254,7 +261,7 @@
           } else {
             try {
               ytPlayer.unMute();
-              ytPlayer.setVolume(100);
+              ytPlayer.setVolume(volume);
             } catch (e) {}
             ytPlayer.playVideo();
           }
