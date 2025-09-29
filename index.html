@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hidden YouTube Player</title>
+    <title>YouTube Music Player</title>
     <style>
       html,
       body {
@@ -179,6 +179,8 @@
     </div>
 
     <script>
+      let volume = 100;
+
       // Load the YouTube Iframe API
       (function loadYouTubeAPI() {
         var tag = document.createElement("script");
@@ -248,7 +250,7 @@
             if (muted) {
               try {
                 ytPlayer.unMute();
-                ytPlayer.setVolume(100);
+                ytPlayer.setVolume(volume);
               } catch (e) {}
             } else {
               ytPlayer.pauseVideo();
@@ -268,6 +270,7 @@
             if (!ytPlayer) return;
             var v = parseInt(volumeSlider.value, 10);
             v = isNaN(v) ? 100 : Math.max(0, Math.min(100, v));
+            volume = v;
             try {
               if (v === 0) {
                 ytPlayer.setVolume(0);
